@@ -20,6 +20,7 @@ public static class ParcelSorterPlayCheck
     private static ParcelItem parcel;
     private static GameManager game;
     private static Button action;
+    private static Button hard;
     private static bool oldBestPresent;
     private static int oldBest;
     private static ParcelItem contactProbe;
@@ -59,10 +60,26 @@ public static class ParcelSorterPlayCheck
             oldBest = PlayerPrefs.GetInt(BestKey);
             game = Object.FindAnyObjectByType<GameManager>();
             GameUIManager board = Object.FindAnyObjectByType<GameUIManager>();
-            action = (Button)new SerializedObject(board).FindProperty("action").objectReferenceValue;
+            SerializedObject controls = new SerializedObject(board);
+            action = (Button)controls.FindProperty("action").objectReferenceValue;
+            Button normal = (Button)controls.FindProperty("normal").objectReferenceValue;
+            hard = (Button)controls.FindProperty("hard").objectReferenceValue;
             if (game.State != GameState.Title) { Finish("Missing title"); return; }
+            normal.onClick.Invoke();
+            if (game.Mode != Difficulty.Normal || game.SpeedMultiplier != 1.5f)
+            {
+                Finish("Normal difficulty was not applied");
+                return;
+            }
+            ((Button)controls.FindProperty("easy").objectReferenceValue).onClick.Invoke();
             action.onClick.Invoke();
             if (game.State != GameState.Playing) { Finish("Board START did not start the timer"); return; }
+            hard.onClick.Invoke();
+            if (game.Mode != Difficulty.Easy || game.SpeedMultiplier != 1f || hard.gameObject.activeInHierarchy)
+            {
+                Finish("Difficulty changed during the Easy round");
+                return;
+            }
             started = Time.time;
             deadline = started + 6f;
             phase = 1;
@@ -127,10 +144,29 @@ public static class ParcelSorterPlayCheck
                 Finish("Round timer, conveyor misses or cleanup failed");
                 return;
             }
+            hard.onClick.Invoke();
             action.onClick.Invoke();
             if (game.State != GameState.Playing || game.Score.Attempts != 0 || game.Score.Points != 0)
             {
                 Finish("Retry did not reset the round");
+                return;
+            }
+            if (game.Mode != Difficulty.Hard || game.SpeedMultiplier != 2f)
+            {
+                Finish("Hard difficulty was not applied on retry");
+                return;
+            }
+            Time.timeScale = 1f;
+            started = Time.time;
+            deadline = started + 3f;
+            phase = 6;
+        }
+        else if (phase == 6 && Time.time >= started + 2.3f)
+        {
+            ParcelItem[] items = Object.FindObjectsByType<ParcelItem>(FindObjectsSortMode.None);
+            if (items.Length != 3 || items.All(item => Mathf.Abs(item.Body.linearVelocity.x - 0.72f) > 0.02f))
+            {
+                Finish("Hard round did not spawn the second parcel or reach the expected belt speed");
                 return;
             }
             Finish("");
@@ -179,7 +215,7 @@ public static class ParcelSorterPlayCheck
         PlayerPrefs.Save();
         Time.timeScale = 1f;
         if (failure.Length > 0) Debug.LogError(failure);
-        else Debug.Log("Parcel play check passed: title, start, physical socket rejection and correction, belt misses, 60-second result, cleanup and retry.");
+        else Debug.Log("Parcel play check passed: Easy start, physical socket rejection and correction, belt misses, 60-second result, cleanup, Hard retry, spawn cadence and belt speed.");
         EditorApplication.Exit(failure.Length > 0 ? 1 : 0);
     }
 }

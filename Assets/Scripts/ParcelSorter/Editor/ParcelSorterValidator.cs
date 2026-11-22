@@ -50,6 +50,13 @@ public static class ParcelSorterValidator
         XROrigin rig = One<XROrigin>(roots);
         Require(rig.GetComponentsInChildren<XRPokeInteractor>().Length == 2, "two active poke interactors");
         Require(rig.GetComponentsInChildren<NearFarInteractor>().Count(hand => hand.enableUIInteraction) == 2, "two grab and UI interactors");
+        foreach (NearFarInteractor hand in rig.GetComponentsInChildren<NearFarInteractor>())
+        {
+            Require(hand.selectInput.inputActionReferencePerformed.action.bindings.Any
+                (binding => binding.path.EndsWith("/{TriggerButton}", StringComparison.Ordinal)), "trigger grab binding");
+            Require(hand.uiPressInput.inputActionReferencePerformed.action.bindings.Any
+                (binding => binding.path.EndsWith("/{TriggerButton}", StringComparison.Ordinal)), "trigger UI binding");
+        }
         Require(rig.GetComponentsInChildren<XRInteractionGroup>().Length >= 2, "controller interaction groups");
         Require(nodes.Single(node => node.name == "Locomotion").gameObject.activeInHierarchy == false, "stationary rig");
         One<XRInteractionManager>(roots);

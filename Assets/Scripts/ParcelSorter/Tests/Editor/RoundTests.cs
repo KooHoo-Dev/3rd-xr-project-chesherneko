@@ -19,13 +19,25 @@ public class RoundTests
         Assert.AreEqual(100f / 3, score.Accuracy, 0.001f);
     }
 
-    [TestCase(200, "S")]
-    [TestCase(199, "A")]
-    [TestCase(140, "A")]
-    [TestCase(139, "B")]
-    [TestCase(80, "B")]
-    [TestCase(79, "C")]
-    public void GradeBoundaries(int score, string grade) => Assert.AreEqual(grade, RoundScore.Grade(score));
+    [TestCase(0, 0, "F")]
+    [TestCase(499, 1000, "F")]
+    [TestCase(500, 1000, "C")]
+    [TestCase(699, 1000, "C")]
+    [TestCase(700, 1000, "B")]
+    [TestCase(799, 1000, "B")]
+    [TestCase(800, 1000, "A")]
+    [TestCase(899, 1000, "A")]
+    [TestCase(900, 1000, "S")]
+    [TestCase(999, 1000, "S")]
+    [TestCase(1999, 2000, "S")]
+    [TestCase(1, 1, "PERFECT!!")]
+    public void GradeBoundaries(int correct, int attempts, string grade)
+    {
+        RoundScore score = new RoundScore();
+        for (int i = 0; i < correct; i++) score.Record(Outcome.Correct);
+        for (int i = correct; i < attempts; i++) score.Record(Outcome.Wrong);
+        Assert.AreEqual(grade, score.Grade);
+    }
 
     [TestCase(60f, 2f)]
     [TestCase(30f, 1.5f)]

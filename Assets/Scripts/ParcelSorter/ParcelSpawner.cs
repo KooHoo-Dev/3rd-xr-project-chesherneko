@@ -12,7 +12,7 @@ namespace ParcelSorter
 
         public void Advance(GameManager game, float remaining)
         {
-            untilSpawn -= Time.deltaTime;
+            untilSpawn -= Time.deltaTime * game.SpeedMultiplier;
             if (untilSpawn > 0f) return;
             ParcelItem item = Instantiate(parcels.GetRandom(), spawn.position, spawn.rotation, inventory);
             item.Initialize(game);

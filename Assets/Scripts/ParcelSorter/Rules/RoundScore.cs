@@ -13,6 +13,16 @@ namespace ParcelSorter
         public int Attempts { get; private set; }
         public int Combo { get; private set; }
         public float Accuracy => Attempts == 0 ? 0f : 100f * Correct / Attempts;
+        public float DisplayedAccuracy => Attempts == 0 ? 0f : (1000L * Correct / Attempts) / 10f;
+        public string Grade => DisplayedAccuracy switch
+        {
+            100f => "PERFECT!!",
+            >= 90f => "S",
+            >= 80f => "A",
+            >= 70f => "B",
+            >= 50f => "C",
+            _ => "F"
+        };
 
         public void Record(Outcome outcome)
         {
@@ -29,9 +39,6 @@ namespace ParcelSorter
                 Combo = 0;
             }
         }
-
-        public static string Grade(int points) =>
-            points >= 200 ? "S" : points >= 140 ? "A" : points >= 80 ? "B" : "C";
 
         public static float Interval(float remaining) => Mathf.Lerp(1f, 2f, remaining / Duration);
         public static float Tick(float remaining, float delta) => Mathf.Max(0f, remaining - delta);

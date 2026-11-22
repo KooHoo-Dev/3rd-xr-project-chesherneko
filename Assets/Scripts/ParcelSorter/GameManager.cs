@@ -4,6 +4,7 @@ using Sirenix.OdinInspector;
 namespace ParcelSorter
 {
     public enum GameState { Title, Playing, Result }
+    public enum Difficulty { Easy, Normal, Hard }
 
     public sealed class GameManager : MonoBehaviour
     {
@@ -14,11 +15,24 @@ namespace ParcelSorter
         [SerializeField] private FeedbackManager feedback;
         [ShowInInspector, ReadOnly] public GameState State { get; private set; }
         public FeedbackManager Feedback => feedback;
+        public Difficulty Mode { get; private set; }
+        public float SpeedMultiplier => Mode switch
+        {
+            Difficulty.Normal => 1.5f,
+            Difficulty.Hard => 2f,
+            _ => 1f
+        };
         public RoundScore Score { get; private set; } = new RoundScore();
         private float remaining;
         private const string BestKey = "ParcelSorter.Best";
 
         private void Start() => ui.ShowTitle();
+
+        public void SetDifficulty(Difficulty difficulty)
+        {
+            if (State == GameState.Playing) return;
+            Mode = difficulty;
+        }
 
         public void Begin()
         {

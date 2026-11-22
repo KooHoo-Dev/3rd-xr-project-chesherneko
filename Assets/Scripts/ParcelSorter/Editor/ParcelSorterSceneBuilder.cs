@@ -78,6 +78,7 @@ public static partial class ParcelSorterSceneBuilder
         Link(spawner, "spawn", spawn);
         Transform station = Station(game);
         Interface(ui, game);
+        ConfigureRoundControls(ui, rig);
         DressWarehouse(station);
         EditorSceneManager.SaveScene(scene, ScenePath);
         EditorBuildSettingsScene[] others = EditorBuildSettings.scenes.Where(entry => entry.path != ScenePath).ToArray();
@@ -140,7 +141,7 @@ public static partial class ParcelSorterSceneBuilder
         SerializedObject serialized = new SerializedObject(asset);
         serialized.FindProperty("m_ClearDynamicDataOnBuild").boolValue = false;
         serialized.ApplyModifiedPropertiesWithoutUndo();
-        string glyphs = "택배 분류소 제작 여기에 본인 이름 입력 상자를 잡고 같은 지역 칸에 놓으세요 서울 부산 대구 광주 초 점 정답 처리 콤보 완료 등급 정확도 최고 기록";
+        string glyphs = "택배 분류소 제작 여기에 본인 이름 입력 트리거로 상자를 잡고 같은 지역 칸에 놓으세요 서울 부산 대구 광주 초 점 정답 처리 콤보 완료 등급 정확도 최고 기록";
         glyphs += new string(Enumerable.Range(32, 95).Select(code => (char)code).ToArray());
         string unbaked = new string(glyphs.Distinct().Where(character => asset.HasCharacter(character) == false).ToArray());
         if (unbaked.Length > 0 && asset.TryAddCharacters(unbaked, out string missing) == false)
